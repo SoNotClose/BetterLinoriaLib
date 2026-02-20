@@ -1512,27 +1512,24 @@ do
                 if not ValidateClick(Input) then return end
                 if Button.Locked then return end
 
-                if Button.DoubleClick then
-                    Library:RemoveFromRegistry(Button.Label)
-                    Library:AddToRegistry(Button.Label, { TextColor3 = 'AccentColor' })
+             if Button.DoubleClick then
+                    local ConfirmColor = (Config.ConfirmTextType == 'font') and 'FontColor' or 'AccentColor'
+                    local ConfirmColorValue = (Config.ConfirmTextType == 'font') and Library.FontColor or Library.AccentColor
 
-                    Button.Label.TextColor3 = Library.AccentColor
+                    Library:RemoveFromRegistry(Button.Label)
+                    Library:AddToRegistry(Button.Label, { TextColor3 = ConfirmColor })
+                    Button.Label.TextColor3 = ConfirmColorValue
                     Button.Label.Text = 'Are you sure?'
                     Button.Locked = true
-
-                    local clicked = WaitForEvent(Button.Outer.InputBegan, 0.5, ValidateClick)
-
+                    local clicked = WaitForEvent(Button.Outer.InputBegan, Config.DoubleClickTime or 0.5, ValidateClick)
                     Library:RemoveFromRegistry(Button.Label)
                     Library:AddToRegistry(Button.Label, { TextColor3 = 'FontColor' })
-
                     Button.Label.TextColor3 = Library.FontColor
                     Button.Label.Text = Button.Text
                     task.defer(rawset, Button, 'Locked', false)
-
                     if clicked then
                         Library:SafeCallback(Button.Func)
                     end
-
                     return
                 end
 
@@ -2948,6 +2945,8 @@ function Library:CreateWindow(...)
     if type(Config.TabPadding) ~= 'number' then Config.TabPadding = 0 end
     if type(Config.MenuFadeTime) ~= 'number' then Config.MenuFadeTime = 0.2 end
     if type(Config.MenuFont) ~= 'nil' then Library.Font = Config.MenuFont end
+    if type(Config.DoubleClickTime) ~= 'number' then Config.DoubleClickTime = 0.5 end
+    if type(Config.ConfirmTextType) ~= 'string' then Config.ConfirmTextType = 'accent' end
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
