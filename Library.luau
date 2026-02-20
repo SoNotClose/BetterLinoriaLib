@@ -2424,8 +2424,8 @@ do
                         Selected = Dropdown.Value == Value;
                     end;
 
-                    ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
-                    Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'AccentColor' or 'FontColor';
+                    ButtonLabel.TextColor3 = Selected and Library.FontColor or Library.AccentColor;
+                    Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'FontColor' or 'AccentColor';
                 end;
 
                 ButtonLabel.InputBegan:Connect(function(Input)
