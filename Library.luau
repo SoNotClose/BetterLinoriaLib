@@ -40,6 +40,9 @@ local Library = {
     Black = Color3.new(0, 0, 0);
     Font = Enum.Font.Code,
 
+    DoubleClickTime = 0.5;
+    ConfirmTextType = 'accent';
+
     OpenedFrames = {};
     DependencyBoxes = {};
 
@@ -1513,15 +1516,15 @@ do
                 if Button.Locked then return end
 
              if Button.DoubleClick then
-                    local ConfirmColor = (Config.ConfirmTextType == 'font') and 'FontColor' or 'AccentColor'
-                    local ConfirmColorValue = (Config.ConfirmTextType == 'font') and Library.FontColor or Library.AccentColor
+                    local ConfirmColor = (Library.ConfirmTextType == 'font') and 'FontColor' or 'AccentColor'
+                    local ConfirmColorValue = (Library.ConfirmTextType == 'font') and Library.FontColor or Library.AccentColor
 
                     Library:RemoveFromRegistry(Button.Label)
                     Library:AddToRegistry(Button.Label, { TextColor3 = ConfirmColor })
                     Button.Label.TextColor3 = ConfirmColorValue
                     Button.Label.Text = 'Are you sure?'
                     Button.Locked = true
-                    local clicked = WaitForEvent(Button.Outer.InputBegan, Config.DoubleClickTime or 0.5, ValidateClick)
+                    local clicked = WaitForEvent(Button.Outer.InputBegan, Library.DoubleClickTime, ValidateClick)
                     Library:RemoveFromRegistry(Button.Label)
                     Library:AddToRegistry(Button.Label, { TextColor3 = 'FontColor' })
                     Button.Label.TextColor3 = Library.FontColor
@@ -2950,6 +2953,9 @@ function Library:CreateWindow(...)
 
     if typeof(Config.Position) ~= 'UDim2' then Config.Position = UDim2.fromOffset(175, 50) end
     if typeof(Config.Size) ~= 'UDim2' then Config.Size = UDim2.fromOffset(550, 600) end
+
+    Library.DoubleClickTime = Config.DoubleClickTime
+    Library.ConfirmTextType = Config.ConfirmTextType
 
     if Config.Center then
         Config.AnchorPoint = Vector2.new(0.5, 0.5)
