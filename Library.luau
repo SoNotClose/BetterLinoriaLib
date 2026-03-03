@@ -20,8 +20,9 @@ local Window = Library:CreateWindow({
         Keys = { 'key1' },      -- or a raw pastbin or shi
         KeyLink = 'https',      -- discord link or something
         MaxTrys         = 3,    -- how many trys before destroying
+        DestroyInvalid = false, -- or true to destroy on first wrong attempt
         PreventGuessers = true, -- will help prevent key guessers
-        DisableDelay    = 3.0,  -- the delay in 
+        DisableDelay    = 3.0,  -- the delay in seconds
     },
 })
 ]]
