@@ -2959,7 +2959,6 @@ function Library:CreateWindow(...)
 
   if type(Config.KeySystem) == 'table' and Config.KeySystem.Enabled then
     local KS = Config.KeySystem
-
     Config.AutoShow = false
 
     local ValidKeys = {}
@@ -2986,18 +2985,20 @@ function Library:CreateWindow(...)
         end
     end
 
-    local hasLink = type(KS.KeyLink) == 'string' and KS.KeyLink ~= ''
+    local hasLink = type(KS.KeyLink) == 'string' and KS.KeyLink ~= '' -- TODO make this better 
 
     local KSOuter = Library:Create('Frame', {
         AnchorPoint      = Vector2.new(0.5, 0.5);
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel  = 0;
         Position         = UDim2.fromScale(0.5, 0.5);
-        Size             = UDim2.fromOffset(320, hasLink and 116 or 96);
+        Size             = UDim2.fromOffset(320, hasLink and 100 or 80);
         Visible          = false;
         ZIndex           = 500;
         Parent           = ScreenGui;
     })
+
+    Library:MakeDraggable(KSOuter) -- CHANGED: draggable
 
     local KSInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -3020,41 +3021,66 @@ function Library:CreateWindow(...)
     Library:AddToRegistry(KSBar, { BackgroundColor3 = 'AccentColor' })
 
     Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 2); Size = UDim2.new(1, -14, 0, 20);
-        TextSize = 15; Text = KS.Title or 'Key System';
-        TextXAlignment = Enum.TextXAlignment.Left; ZIndex = 503; Parent = KSInner;
+        Position       = UDim2.new(0, 7, 0, 2);
+        Size           = UDim2.new(1, -14, 0, 20);
+        TextSize       = 15;
+        Text           = KS.Title or 'Key System';
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex         = 503;
+        Parent         = KSInner;
     })
 
     Library:CreateLabel({
-        Position = UDim2.new(0, 7, 0, 22); Size = UDim2.new(1, -14, 0, 14);
-        TextSize = 12; Text = KS.Info or '';
-        TextColor3 = Color3.fromRGB(160, 160, 160);
-        TextXAlignment = Enum.TextXAlignment.Left; ZIndex = 503; Parent = KSInner;
+        Position       = UDim2.new(0, 7, 0, 22);
+        Size           = UDim2.new(1, -14, 0, 14);
+        TextSize       = 12;
+        Text           = KS.Info or '';
+        TextColor3     = Color3.fromRGB(160, 160, 160);
+        TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex         = 503;
+        Parent         = KSInner;
     })
 
     local KSBoxOuter = Library:Create('Frame', {
-        BackgroundColor3 = Color3.new(0,0,0); BorderColor3 = Color3.new(0,0,0);
-        Position = UDim2.new(0, 6, 0, 38); Size = UDim2.new(1, -12, 0, 20);
-        ZIndex = 502; Parent = KSInner;
+        BackgroundColor3 = Color3.new(0,0,0);
+        BorderColor3     = Color3.new(0,0,0);
+        Position         = UDim2.new(0, 6, 0, 38);
+        Size             = UDim2.new(1, -12, 0, 20);
+        ZIndex           = 502;
+        Parent           = KSInner;
     })
     local KSBoxInner = Library:Create('Frame', {
-        BackgroundColor3 = Library.MainColor; BorderColor3 = Library.OutlineColor;
-        BorderMode = Enum.BorderMode.Inset; Size = UDim2.new(1,0,1,0);
-        ZIndex = 503; Parent = KSBoxOuter;
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3     = Library.OutlineColor;
+        BorderMode       = Enum.BorderMode.Inset;
+        Size             = UDim2.new(1, 0, 1, 0);
+        ZIndex           = 503;
+        Parent           = KSBoxOuter;
     })
     Library:AddToRegistry(KSBoxInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
     Library:Create('UIGradient', {
-        Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.new(1,1,1)), ColorSequenceKeypoint.new(1, Color3.fromRGB(212,212,212)) });
+        Color    = ColorSequence.new({
+            ColorSequenceKeypoint.new(0, Color3.new(1,1,1)),
+            ColorSequenceKeypoint.new(1, Color3.fromRGB(212,212,212)),
+        });
         Rotation = 90; Parent = KSBoxInner;
     })
     Library:OnHighlight(KSBoxOuter, KSBoxOuter, { BorderColor3 = 'AccentColor' }, { BorderColor3 = 'Black' })
 
     local KSBox = Library:Create('TextBox', {
-        BackgroundTransparency = 1; Position = UDim2.new(0,5,0,0); Size = UDim2.new(1,-5,1,0);
-        Font = Library.Font; PlaceholderColor3 = Color3.fromRGB(190,190,190);
-        PlaceholderText = 'Enter key...'; Text = ''; TextColor3 = Library.FontColor;
-        TextSize = 14; TextStrokeTransparency = 0; TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = 504; Parent = KSBoxInner;
+        BackgroundTransparency = 1;
+        Position               = UDim2.new(0, 5, 0, 0);
+        Size                   = UDim2.new(1, -5, 1, 0);
+        Font                   = Library.Font;
+        PlaceholderColor3      = Color3.fromRGB(190, 190, 190);
+        PlaceholderText        = 'Enter key...';
+        Text                   = '';
+        TextColor3             = Library.FontColor;
+        TextSize               = 14;
+        TextStrokeTransparency = 0;
+        TextXAlignment         = Enum.TextXAlignment.Left;
+        ZIndex                 = 504;
+        Parent                 = KSBoxInner;
     })
     Library:ApplyTextStroke(KSBox)
     Library:AddToRegistry(KSBox, { TextColor3 = 'FontColor' })
@@ -3095,16 +3121,20 @@ function Library:CreateWindow(...)
         end)
     end
 
-    local KSStatus = Library:CreateLabel({
-        Position = UDim2.new(0, 7, 1, -16); Size = UDim2.new(1, -14, 0, 14);
-        TextSize = 12; Text = ''; TextColor3 = Library.RiskColor;
-        TextXAlignment = Enum.TextXAlignment.Center; ZIndex = 503; Parent = KSInner;
-    })
-    Library:AddToRegistry(KSStatus, { TextColor3 = 'RiskColor' })
-
     local function TryConfirm()
         local input = KSBox.Text:match('^%s*(.-)%s*$')
-        if input == '' then KSStatus.Text = 'Please enter a key.' return end
+
+        if input == '' then
+            KSBox.PlaceholderText = 'Please enter a key...'
+            KSBox.PlaceholderColor3 = Library.RiskColor
+            task.delay(1.5, function()
+                if KSBox and KSBox.Parent then
+                    KSBox.PlaceholderText = 'Enter key...'
+                    KSBox.PlaceholderColor3 = Color3.fromRGB(190, 190, 190)
+                end
+            end)
+            return
+        end
 
         local found = false
         for _, k in next, ValidKeys do
@@ -3113,10 +3143,24 @@ function Library:CreateWindow(...)
 
         if found then
             KSOuter:Destroy()
-            task.spawn(Library.Toggle) -- open the ui
+            task.spawn(Library.Toggle)
         else
-            KSStatus.Text = 'Invalid key. Please try again.'
+            -- CHANGED: DestroyInvalid support
+            if KS.DestroyInvalid then
+                KSOuter:Destroy()
+                ScreenGui:Destroy()
+                return
+            end
+
             KSBox.Text = ''
+            KSBox.PlaceholderText = 'Invalid key...'
+            KSBox.PlaceholderColor3 = Library.RiskColor
+            task.delay(1.5, function()
+                if KSBox and KSBox.Parent then
+                    KSBox.PlaceholderText = 'Enter key...'
+                    KSBox.PlaceholderColor3 = Color3.fromRGB(190, 190, 190)
+                end
+            end)
         end
     end
 
