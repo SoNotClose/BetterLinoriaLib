@@ -2958,6 +2958,7 @@ function Library:CreateWindow(...)
     Library.ConfirmTextType = Config.ConfirmTextType
 
   if type(Config.KeySystem) == 'table' and Config.KeySystem.Enabled then
+    Library._KeySystemActive = true
     local KS = Config.KeySystem
     Config.AutoShow = false
 
@@ -3142,11 +3143,13 @@ function Library:CreateWindow(...)
         end
 
         if found then
+           Library._KeySystemActive = false
             KSOuter:Destroy()
             task.spawn(Library.Toggle)
         else
             -- CHANGED: DestroyInvalid support
             if KS.DestroyInvalid then
+                Library._KeySystemActive = false
                 KSOuter:Destroy()
                 ScreenGui:Destroy()
                 return
@@ -3816,6 +3819,7 @@ end
     end
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
+        if Library._KeySystemActive then return end  -- avrg dumbass aka ME wouldnt check if we have a keysystem
         if type(Library.ToggleKeybind) == 'table' and Library.ToggleKeybind.Type == 'KeyPicker' then
             if Input.UserInputType == Enum.UserInputType.Keyboard and Input.KeyCode.Name == Library.ToggleKeybind.Value then
                 task.spawn(Library.Toggle)
