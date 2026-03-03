@@ -2993,7 +2993,7 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel  = 0;
         Position         = UDim2.fromScale(0.5, 0.5);
-        Size             = UDim2.fromOffset(320, hasLink and 125 or 115);
+        Size             = UDim2.fromOffset(320, 108);
         Visible          = false;
         ZIndex           = 500;
         Parent           = ScreenGui;
