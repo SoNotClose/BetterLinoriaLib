@@ -2964,6 +2964,10 @@ function Library:CreateWindow(...)
     Config.AutoShow = false
 
     local ValidKeys = {}
+    local Tries = 0
+    local ConfirmLocked = false
+    local DisableDelay = (type(KS.DisableDelay) == 'number') and KS.DisableDelay or 0
+    local PreventGuessers = KS.PreventGuessers == true and DisableDelay > 0
 
     local function LoadKeys(Callback)
         if type(KS.Keys) == 'table' then
@@ -2987,20 +2991,20 @@ function Library:CreateWindow(...)
         end
     end
 
-    local hasLink = type(KS.KeyLink) == 'string' and KS.KeyLink ~= '' -- TODO make this better 
+    local hasLink = type(KS.KeyLink) == 'string' and KS.KeyLink ~= ''
 
     local KSOuter = Library:Create('Frame', {
         AnchorPoint      = Vector2.new(0.5, 0.5);
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel  = 0;
         Position         = UDim2.fromScale(0.5, 0.5);
-        Size             = UDim2.fromOffset(320, 92);
+        Size             = UDim2.fromOffset(320, 90);
         Visible          = false;
         ZIndex           = 500;
         Parent           = ScreenGui;
     })
 
-    Library:MakeDraggable(KSOuter) -- i didnt relize this library has this func | CHANGE: made draggable
+    Library:MakeDraggable(KSOuter)
 
     local KSInner = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor;
@@ -3108,7 +3112,7 @@ function Library:CreateWindow(...)
     end
 
     local confirmSize = hasLink and UDim2.new(0.5, -8, 0, 20) or UDim2.new(1, -12, 0, 20)
-    local ConfirmOuter = MakeButton('Confirm', UDim2.new(0, 6, 0, 62), confirmSize)
+    local ConfirmOuter, ConfirmLabel = MakeButton('Confirm', UDim2.new(0, 6, 0, 62), confirmSize)
 
     if hasLink then
         local LinkOuter, LinkLabel = MakeButton('Copy Link', UDim2.new(0.5, 2, 0, 62), UDim2.new(0.5, -8, 0, 20))
@@ -3124,6 +3128,8 @@ function Library:CreateWindow(...)
     end
 
     local function TryConfirm()
+        if ConfirmLocked then return end
+
         local input = KSBox.Text:match('^%s*(.-)%s*$')
 
         if input == '' then
@@ -3144,12 +3150,13 @@ function Library:CreateWindow(...)
         end
 
         if found then
-           Library._KeySystemActive = false
+            Library._KeySystemActive = false
             KSOuter:Destroy()
             task.spawn(Library.Toggle)
         else
-            -- CHANGED: DestroyInvalid support
-            if KS.DestroyInvalid then
+            Tries = Tries + 1
+
+            if KS.DestroyInvalid or (KS.MaxTrys and Tries >= KS.MaxTrys) then
                 Library._KeySystemActive = false
                 KSOuter:Destroy()
                 ScreenGui:Destroy()
@@ -3165,6 +3172,24 @@ function Library:CreateWindow(...)
                     KSBox.PlaceholderColor3 = Color3.fromRGB(190, 190, 190)
                 end
             end)
+
+            if PreventGuessers then
+                ConfirmLocked = true
+                local elapsed = 0
+                local step = 0.05
+                while elapsed < DisableDelay do
+                    elapsed = math.min(elapsed + step, DisableDelay)
+                    local remaining = DisableDelay - elapsed
+                    if ConfirmLabel and ConfirmLabel.Parent then
+                        ConfirmLabel.Text = string.format('Confirm (%.1f)', remaining)
+                    end
+                    task.wait(step)
+                end
+                if ConfirmLabel and ConfirmLabel.Parent then
+                    ConfirmLabel.Text = 'Confirm'
+                end
+                ConfirmLocked = false
+            end
         end
     end
 
