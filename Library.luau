@@ -2994,7 +2994,7 @@ function Library:CreateWindow(...)
         BackgroundColor3 = Color3.new(0, 0, 0);
         BorderSizePixel  = 0;
         Position         = UDim2.fromScale(0.5, 0.5);
-        Size             = UDim2.fromOffset(320, 88);
+        Size             = UDim2.fromOffset(320, 92);
         Visible          = false;
         ZIndex           = 500;
         Parent           = ScreenGui;
