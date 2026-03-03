@@ -2957,6 +2957,177 @@ function Library:CreateWindow(...)
     Library.DoubleClickTime = Config.DoubleClickTime
     Library.ConfirmTextType = Config.ConfirmTextType
 
+  if type(Config.KeySystem) == 'table' and Config.KeySystem.Enabled then
+    local KS = Config.KeySystem
+
+    Config.AutoShow = false
+
+    local ValidKeys = {}
+
+    local function LoadKeys(Callback)
+        if type(KS.Keys) == 'table' then
+            ValidKeys = KS.Keys
+            Callback()
+        elseif type(KS.Keys) == 'string' and KS.Keys ~= '' then
+            task.spawn(function()
+                local ok, result = pcall(function()
+                    local t = {}
+                    for line in game:HttpGet(KS.Keys):gmatch('[^\r\n]+') do
+                        local trimmed = line:match('^%s*(.-)%s*$')
+                        if trimmed ~= '' then table.insert(t, trimmed) end
+                    end
+                    return t
+                end)
+                ValidKeys = (ok and type(result) == 'table') and result or {}
+                Callback()
+            end)
+        else
+            Callback()
+        end
+    end
+
+    local hasLink = type(KS.KeyLink) == 'string' and KS.KeyLink ~= ''
+
+    local KSOuter = Library:Create('Frame', {
+        AnchorPoint      = Vector2.new(0.5, 0.5);
+        BackgroundColor3 = Color3.new(0, 0, 0);
+        BorderSizePixel  = 0;
+        Position         = UDim2.fromScale(0.5, 0.5);
+        Size             = UDim2.fromOffset(320, hasLink and 116 or 96);
+        Visible          = false;
+        ZIndex           = 500;
+        Parent           = ScreenGui;
+    })
+
+    local KSInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor;
+        BorderColor3     = Library.AccentColor;
+        BorderMode       = Enum.BorderMode.Inset;
+        Position         = UDim2.new(0, 1, 0, 1);
+        Size             = UDim2.new(1, -2, 1, -2);
+        ZIndex           = 501;
+        Parent           = KSOuter;
+    })
+    Library:AddToRegistry(KSInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'AccentColor' })
+
+    local KSBar = Library:Create('Frame', {
+        BackgroundColor3 = Library.AccentColor;
+        BorderSizePixel  = 0;
+        Size             = UDim2.new(1, 0, 0, 2);
+        ZIndex           = 502;
+        Parent           = KSInner;
+    })
+    Library:AddToRegistry(KSBar, { BackgroundColor3 = 'AccentColor' })
+
+    Library:CreateLabel({
+        Position = UDim2.new(0, 7, 0, 2); Size = UDim2.new(1, -14, 0, 20);
+        TextSize = 15; Text = KS.Title or 'Key System';
+        TextXAlignment = Enum.TextXAlignment.Left; ZIndex = 503; Parent = KSInner;
+    })
+
+    Library:CreateLabel({
+        Position = UDim2.new(0, 7, 0, 22); Size = UDim2.new(1, -14, 0, 14);
+        TextSize = 12; Text = KS.Info or '';
+        TextColor3 = Color3.fromRGB(160, 160, 160);
+        TextXAlignment = Enum.TextXAlignment.Left; ZIndex = 503; Parent = KSInner;
+    })
+
+    local KSBoxOuter = Library:Create('Frame', {
+        BackgroundColor3 = Color3.new(0,0,0); BorderColor3 = Color3.new(0,0,0);
+        Position = UDim2.new(0, 6, 0, 38); Size = UDim2.new(1, -12, 0, 20);
+        ZIndex = 502; Parent = KSInner;
+    })
+    local KSBoxInner = Library:Create('Frame', {
+        BackgroundColor3 = Library.MainColor; BorderColor3 = Library.OutlineColor;
+        BorderMode = Enum.BorderMode.Inset; Size = UDim2.new(1,0,1,0);
+        ZIndex = 503; Parent = KSBoxOuter;
+    })
+    Library:AddToRegistry(KSBoxInner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
+    Library:Create('UIGradient', {
+        Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.new(1,1,1)), ColorSequenceKeypoint.new(1, Color3.fromRGB(212,212,212)) });
+        Rotation = 90; Parent = KSBoxInner;
+    })
+    Library:OnHighlight(KSBoxOuter, KSBoxOuter, { BorderColor3 = 'AccentColor' }, { BorderColor3 = 'Black' })
+
+    local KSBox = Library:Create('TextBox', {
+        BackgroundTransparency = 1; Position = UDim2.new(0,5,0,0); Size = UDim2.new(1,-5,1,0);
+        Font = Library.Font; PlaceholderColor3 = Color3.fromRGB(190,190,190);
+        PlaceholderText = 'Enter key...'; Text = ''; TextColor3 = Library.FontColor;
+        TextSize = 14; TextStrokeTransparency = 0; TextXAlignment = Enum.TextXAlignment.Left;
+        ZIndex = 504; Parent = KSBoxInner;
+    })
+    Library:ApplyTextStroke(KSBox)
+    Library:AddToRegistry(KSBox, { TextColor3 = 'FontColor' })
+
+    local function MakeButton(text, pos, size)
+        local Outer = Library:Create('Frame', {
+            BackgroundColor3 = Color3.new(0,0,0); BorderColor3 = Color3.new(0,0,0);
+            Position = pos; Size = size; ZIndex = 502; Parent = KSInner;
+        })
+        local Inner = Library:Create('Frame', {
+            BackgroundColor3 = Library.MainColor; BorderColor3 = Library.OutlineColor;
+            BorderMode = Enum.BorderMode.Inset; Size = UDim2.new(1,0,1,0); ZIndex = 503; Parent = Outer;
+        })
+        Library:AddToRegistry(Outer, { BorderColor3 = 'Black' })
+        Library:AddToRegistry(Inner, { BackgroundColor3 = 'MainColor'; BorderColor3 = 'OutlineColor' })
+        Library:Create('UIGradient', {
+            Color = ColorSequence.new({ ColorSequenceKeypoint.new(0, Color3.new(1,1,1)), ColorSequenceKeypoint.new(1, Color3.fromRGB(212,212,212)) });
+            Rotation = 90; Parent = Inner;
+        })
+        Library:OnHighlight(Outer, Outer, { BorderColor3 = 'AccentColor' }, { BorderColor3 = 'Black' })
+        local Label = Library:CreateLabel({ Size = UDim2.new(1,0,1,0); TextSize = 14; Text = text; ZIndex = 504; Parent = Inner; })
+        return Outer, Label
+    end
+
+    local confirmSize = hasLink and UDim2.new(0.5, -8, 0, 20) or UDim2.new(1, -12, 0, 20)
+    local ConfirmOuter = MakeButton('Confirm', UDim2.new(0, 6, 0, 62), confirmSize)
+
+    if hasLink then
+        local LinkOuter, LinkLabel = MakeButton('Copy Link', UDim2.new(0.5, 2, 0, 62), UDim2.new(0.5, -8, 0, 20))
+        LinkOuter.InputBegan:Connect(function(Input)
+            if Input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+            pcall(setclipboard, KS.KeyLink)
+            Library:Notify('Copied key link to clipboard!', 2)
+            LinkLabel.TextColor3 = Library.AccentColor
+            task.delay(0.6, function()
+                if LinkLabel and LinkLabel.Parent then LinkLabel.TextColor3 = Library.FontColor end
+            end)
+        end)
+    end
+
+    local KSStatus = Library:CreateLabel({
+        Position = UDim2.new(0, 7, 1, -16); Size = UDim2.new(1, -14, 0, 14);
+        TextSize = 12; Text = ''; TextColor3 = Library.RiskColor;
+        TextXAlignment = Enum.TextXAlignment.Center; ZIndex = 503; Parent = KSInner;
+    })
+    Library:AddToRegistry(KSStatus, { TextColor3 = 'RiskColor' })
+
+    local function TryConfirm()
+        local input = KSBox.Text:match('^%s*(.-)%s*$')
+        if input == '' then KSStatus.Text = 'Please enter a key.' return end
+
+        local found = false
+        for _, k in next, ValidKeys do
+            if k == input then found = true break end
+        end
+
+        if found then
+            KSOuter:Destroy()
+            task.spawn(Library.Toggle) -- open the ui
+        else
+            KSStatus.Text = 'Invalid key. Please try again.'
+            KSBox.Text = ''
+        end
+    end
+
+    ConfirmOuter.InputBegan:Connect(function(Input)
+        if Input.UserInputType == Enum.UserInputType.MouseButton1 then TryConfirm() end
+    end)
+    KSBox.FocusLost:Connect(function(enter) if enter then TryConfirm() end end)
+
+    LoadKeys(function() KSOuter.Visible = true end)
+end
+
     if Config.Center then
         Config.AnchorPoint = Vector2.new(0.5, 0.5)
         Config.Position = UDim2.fromScale(0.5, 0.5)
