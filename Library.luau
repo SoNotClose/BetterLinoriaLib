@@ -1,5 +1,31 @@
 -- once again not mine
 -- i juste added to it
+-- example
+
+--[[
+local Window = Library:CreateWindow({
+    Title = 'title', -- title of the window
+    Center = true, -- if you want the ui to center istelf or use position
+    AutoShow = true, -- if you want it to auto show on execute | this doesnt matter when using keysystem
+    TabPadding = 6.5,
+    MenuFadeTime = 0.15,
+    CustomCursor = false, -- better to disable if you want to support bad executors
+    DoubleClickTime = 0.68, -- the double click time inbweteen double clickable buttons
+    ConfirmTextType = 'font', -- font = fontcolor | accent = accent color
+    Size = UDim2.fromOffset(500, 600), -- avrg
+    KeySystem = {
+        Enabled = false,
+        Title = 'Key System',
+        Info = 'You can get the key from the discord',
+        Keys = { 'key1' },      -- or a raw pastbin or shi
+        KeyLink = 'https',      -- discord link or something
+        MaxTrys         = 3,    -- how many trys before destroying
+        PreventGuessers = true, -- will help prevent key guessers
+        DisableDelay    = 3.0,  -- the delay in 
+    },
+})
+]]
+
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local CoreGui = game:GetService('CoreGui');
@@ -3164,11 +3190,13 @@ function Library:CreateWindow(...)
             end
 
             KSBox.Text = ''
+            KSBox.TextEditable = false
             KSBox.PlaceholderText = 'Invalid key...'
             KSBox.PlaceholderColor3 = Library.RiskColor
-            task.delay(1.5, function()
+            task.delay(1, function()
                 if KSBox and KSBox.Parent then
                     KSBox.PlaceholderText = 'Enter key...'
+                    KSBox.TextEditable = true
                     KSBox.PlaceholderColor3 = Color3.fromRGB(190, 190, 190)
                 end
             end)
